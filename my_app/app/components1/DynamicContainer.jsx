@@ -1,53 +1,21 @@
-import { View, Text } from 'react-native'
+import {View,Text} from 'react-native'
 import React from 'react'
 
-import { StyleSheet, Dimensions } from 'react-native';
-const { width, height } = Dimensions.get('window');
+import {StyleSheet,Dimensions} from 'react-native';
+const { width} = Dimensions.get('window');
 export const isSmallScreen = width < 500;
 
 export default function DynamicContainer(props) {
 
   return (
     <View style={styles.Container}>
-            <Text style={styles.ContainerTitre}>{props.label}</Text>
-            <View style={styles.Containerbody}>
-                { props.children }
-            </View>
+      <Text style={styles.ContainerTitre}>{props.label}</Text>
+      <View style={styles.Containerbody}>
+          { props.children }
+      </View>
     </View>
   )
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -82,8 +50,7 @@ export const styles = StyleSheet.create({
       borderTopRightRadius:0,
       flexDirection: 'row',
       flexWrap: 'wrap',
-      justifyContent: isSmallScreen ? 'center' : 'space-between',
-      paddingVertical: isSmallScreen ? 20 : 25,
+      padding: isSmallScreen ? 20 : 18,
       borderWidth: 1,
       borderTopWidth: 0,
   },

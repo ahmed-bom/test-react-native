@@ -7,9 +7,6 @@ const { width } = Dimensions.get('window');
 import { Feather } from '@expo/vector-icons';
 
 
-
-
-
 export default function DynamicSadeBar(props) {
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -18,7 +15,19 @@ export default function DynamicSadeBar(props) {
   const renderLinks = () => {
     if(props.links != undefined){
     return props.links.map((item, index) => (
-      <Text style={styles.drawerItem}>{item}</Text>
+      <TouchableOpacity 
+        key={index}
+        style={styles.drawerItem}
+        onPress={()=>{
+        props.setpageIndex(index);
+        toggleDrawer()
+      }}>
+        <Text style={
+          props.pageIndex == index ? styles.drawerItemTextS : styles.drawerItemTextNS
+        }>
+          {item}
+        </Text>
+      </TouchableOpacity>
     ));
     }
   };
@@ -26,6 +35,7 @@ export default function DynamicSadeBar(props) {
   const toggleDrawer = () => {
     setIsDrawerOpen(!isDrawerOpen);
   };
+
 
   useEffect(() => {
     Animated.timing(slideAnim, {
@@ -35,21 +45,19 @@ export default function DynamicSadeBar(props) {
     }).start();
   }, [isDrawerOpen, slideAnim]);
 
+
+
   return (
     <View style={styles.container}>
-
       <View style={styles.header}>
         <TouchableOpacity style={styles.openbutton} onPress={toggleDrawer}>
           <Feather style={styles.openbuttonText} name="menu" size={20} color="white" />
         </TouchableOpacity>
-        <Text style={styles.headerText}>my app</Text>
+        <Text style={styles.headerText}>{props.links[props.pageIndex]}</Text>
         <Feather style={styles.headerText} name="log-out" size={20} color="white" />
-      </View>
-      
-
+      </View> 
 
       {props.children}
-
 
       <Animated.View
         style={[
@@ -63,38 +71,11 @@ export default function DynamicSadeBar(props) {
           <Feather style={styles.closeButtonText} name="x" size={20} color="white" />
         </TouchableOpacity>
         {renderLinks()}
- 
       </Animated.View>
+
     </View>
   );
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -131,8 +112,7 @@ const styles = StyleSheet.create({
     left: 0,
     width: width * 0.7, 
     height: '100%',
-    backgroundColor: 'rgb(115, 115, 225)',
-    padding: 10,
+    backgroundColor: 'rgb(129, 129, 255)',
     zIndex: 1, 
   },
   closeButton: {
@@ -144,12 +124,19 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   drawerItem: {
-    paddingVertical: 15,
     marginLeft: 10,
     borderBottomWidth: 1,
     borderBottomColor: 'white',
-    color: "white",
     fontSize: 16,
   },
+  drawerItemTextS: {
+    color: "rgb(0, 31, 132)",
+    paddingVertical: 15,
+    backgroundColor:'rgba(0, 16, 67, 0.27)'
+  },
+  drawerItemTextNS: {
+    color: 'white',
+    paddingVertical: 15,
+  }
 });
 
