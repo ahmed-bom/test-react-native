@@ -8,9 +8,11 @@ export const isSmallScreen = width < 500;
 export default function DynamicContainer(props) {
 
   return (
-    <View style={styles.Container}>
+    <View 
+      style={props.small ? styles.scontainer:styles.Container}
+    >
       <Text style={styles.ContainerTitre}>{props.label}</Text>
-      <View style={styles.Containerbody}>
+      <View style={[styles.Containerbody,props.style]}>
           { props.children }
       </View>
     </View>
@@ -25,34 +27,43 @@ export default function DynamicContainer(props) {
 export const styles = StyleSheet.create({
 
   Container: {
-    width: "100%",
+    width: isSmallScreen ?"100%":"80%",
+    paddingHorizontal:isSmallScreen ? 0 : 15,
+    marginVertical:isSmallScreen ? 20 : 30,
+  },
+  scontainer:{
+    width: isSmallScreen ?"100%":"33%",
     paddingHorizontal:isSmallScreen ? 10 : 15,
     marginVertical:isSmallScreen ? 25 : 30,
   },
 
   ContainerTitre: {
       paddingVertical: isSmallScreen ? 10 : 12,
-      textAlign: 'center',
-      backgroundColor: 'rgb(240, 238, 255)', 
+      paddingHorizontal: isSmallScreen ? 0:100,
+      textAlign: isSmallScreen ?'center':"left",
+      paddingLeft: isSmallScreen? 0:20,
+      backgroundColor: 'rgb(199, 232, 253)', 
       borderRadius: 8,
       borderBottomLeftRadius: 0,
       borderBottomRightRadius: 0,
-      fontSize: isSmallScreen ? 16 : 18,
+      fontSize: isSmallScreen ? 18 : 18,
       fontWeight: 'bold',
       color: "black", 
-      borderWidth: 1,
+      borderWidth: isSmallScreen ? 1 : 2,
       borderBottomWidth: 0,
+      borderColor:"rgb(164, 164, 164)",
   },
   Containerbody: {
+      paddingVertical:isSmallScreen ? 10 : 15,
       backgroundColor: "white", 
       borderRadius: 8,
       borderTopLeftRadius: 0,
       borderTopRightRadius:0,
       flexDirection: 'row',
       flexWrap: 'wrap',
-      padding: isSmallScreen ? 20 : 18,
-      borderWidth: 1,
+      borderWidth: isSmallScreen ? 1 : 2,
       borderTopWidth: 0,
+      borderColor:"rgb(166, 166, 166)",
   },
 
 })

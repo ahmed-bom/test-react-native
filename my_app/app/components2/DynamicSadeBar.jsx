@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Animated, Dimensions } from 'react-native';
+import { View,Image, Text, TouchableOpacity, StyleSheet, Animated, Dimensions } from 'react-native';
 
-const { width } = Dimensions.get('window');
+const {width} = Dimensions.get('window');
+export const isSmallScreen = width < 500;
 
 
 import { Feather } from '@expo/vector-icons';
@@ -11,19 +12,18 @@ export default function DynamicSadeBar(props) {
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const slideAnim = useRef(new Animated.Value(-width)).current; 
-
   const renderLinks = () => {
     if(props.links != undefined){
     return props.links.map((item, index) => (
       <TouchableOpacity 
         key={index}
-        style={styles.drawerItem}
+        style={[styles.drawerItem,props.pageIndex == index && {backgroundColor:'rgba(3, 0, 45, 0.55)'}]}
         onPress={()=>{
         props.setpageIndex(index);
         toggleDrawer()
       }}>
         <Text style={
-          props.pageIndex == index ? styles.drawerItemTextS : styles.drawerItemTextNS
+          styles.drawerItemTextNS
         }>
           {item}
         </Text>
@@ -51,11 +51,14 @@ export default function DynamicSadeBar(props) {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.openbutton} onPress={toggleDrawer}>
-          <Feather style={styles.openbuttonText} name="menu" size={20} color="white" />
+          <Feather style={styles.buttonText} name="menu" size={isSmallScreen ?20:30} color="white" />
         </TouchableOpacity>
         <Text style={styles.headerText}>{props.links[props.pageIndex]}</Text>
-        <Feather style={styles.headerText} name="log-out" size={20} color="white" />
+        <TouchableOpacity style={styles.openbutton} onPress={()=>{props.setislogin(false)}}>
+          <Feather style={styles.buttonText} name="log-out" size={isSmallScreen ?20:30} color="white" />
+        </TouchableOpacity>
       </View> 
+
 
       {props.children}
 
@@ -67,10 +70,21 @@ export default function DynamicSadeBar(props) {
           },
         ]}
       >
+
         <TouchableOpacity style={styles.closeButton} onPress={toggleDrawer}>
           <Feather style={styles.closeButtonText} name="x" size={20} color="white" />
         </TouchableOpacity>
-        {renderLinks()}
+        <Image
+          style={styles.image}
+          source={require('../../assets/images/images.png')} 
+        />
+
+        <View
+          style={styles.links}
+        >
+            {renderLinks()}
+        </View>
+
       </Animated.View>
 
     </View>
@@ -87,32 +101,35 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    backgroundColor: "rgb(0, 0, 0)",
-    width: "100%"
+    backgroundColor: "rgb(0, 5, 60)",
+    width: "100%",
+    height:60,
   },
   headerText: {
-    padding: 15,
-    alignContent: "center",
+    height:"100%",
     color: "white",
+    fontWeight: 'bold',
+    fontSize: 14,
+    paddingVertical:20,
   },
   openbutton: {
     padding: 15,
-    backgroundColor: "rgb(115, 115, 255)",
+    backgroundColor: "rgba(115, 115, 255, 0)",
     alignItems: 'center',
     width: 50,
   },
-  openbuttonText: {
+
+  buttonText: {
     color: "white",
-    fontSize: 16,
   },
 
   drawer: {
     position: 'absolute',
     top: 0,
     left: 0,
-    width: width * 0.7, 
+    width:isSmallScreen ? width * 0.7:width * 0.3, 
     height: '100%',
-    backgroundColor: 'rgb(129, 129, 255)',
+    backgroundColor: 'rgba(0, 5, 60, 0.88)',
     zIndex: 1, 
   },
   closeButton: {
@@ -124,19 +141,27 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   drawerItem: {
-    marginLeft: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: 'white',
+    paddingLeft:isSmallScreen ?10:20,
+    borderWidth: 1,
+    borderLeftWidth:0,
+    borderRightWidth:0,
+    borderColor: 'white',
     fontSize: 16,
   },
   drawerItemTextS: {
-    color: "rgb(0, 31, 132)",
+    color:'white',
     paddingVertical: 15,
-    backgroundColor:'rgba(0, 16, 67, 0.27)'
+    
   },
   drawerItemTextNS: {
     color: 'white',
     paddingVertical: 15,
-  }
+  },
+  links:{
+    marginTop: 0,
+  },
+  image: {
+
+  },
 });
 

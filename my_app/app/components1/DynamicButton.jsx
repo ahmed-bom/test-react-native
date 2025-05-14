@@ -16,34 +16,48 @@ export default function DynamicButton(props) {
     
     switch (props.type) {
         case "Réinitialiser":
-            button_color = "rgb(255, 0, 0)";
+            button_color = "rgb(201, 32, 32)";
             text_color = 'white';
             icon = 'refresh-cw';
-            text = "Réinitialiser";    
+            text = props.type   
         break;
         case "Ajouter":
-            button_color = 'rgb(0, 0, 255)'
+            button_color = 'rgb(52, 71, 177)'
             text_color = 'white';
             icon = "plus";
-            text = "Ajouter";
+            text = props.type
         break;
         case "Retour":
             button_color = 'rgb(206, 206, 206)'
             icon = "arrow-left";
-            text = "Retour"        
+            text = props.type      
             break;
         case "Enregistrer":
             button_color = 'rgb(0, 72, 255)'
             text_color = 'white';
             icon = "download"
-            text = "Enregistrer"
+            text = props.type
         break;
         case "Valider":
             button_color = 'rgb(0, 187, 44)'
             text_color = 'white';
-            icon = "check"
-            text = "Valider"
-            break;             
+            text = props.type
+            break;  
+        case "Rechercher":
+            button_color = 'rgb(74, 165, 255)'
+            text_color = 'white';
+            text = props.type
+            icon = "zoom-in"
+            break
+        case "login":
+            button_color = 'rgb(74, 165, 255)'
+            text_color = 'white';
+            text = props.type
+        case "signup":
+            button_color = 'rgb(74, 165, 255)'
+            text_color = 'white';
+            text = props.type
+
     }
 
 

@@ -3,6 +3,7 @@ import {
   View,
   Text,
   ScrollView,
+  Image,
 } from 'react-native';
 
 import { StyleSheet, Dimensions } from 'react-native';
@@ -13,36 +14,78 @@ export const isSmallScreen = width < 500;
 import DynamicTable from './components2/DynamicTable';
 import DynamicForm from './components2/DynamicForm';
 
-export default function DynamicPage({page}) {
+export default function DynamicPage(props) {
 
+    
+    const page = props.page;
     const tables = () => {
-        return page.tables.map((table,i)=> (
-            <DynamicTable
-                key={i}
-                header={table.header}
-                data={table.data}
-            />
-        ))
+        if(page.tables != undefined){
+            return page.tables.map((table,i)=> (
+                <DynamicTable
+                    key={i}
+                    name={table.name}
+                    header={table.header}
+                    data={table.data}
+                />
+            ))
+        }else{
+            return (
+                <>
+                <Text>
+                </Text>
+                </>
+            )
+        }
+    }
+
+
+    const login = () =>{
+        props.login()
+    }
+    const signup = ()=>{
+        props.signup()
     }
 
 
     const forms = () => {
-        return page.forms.map((form,i)=> (
-            <DynamicForm
-                key={i}
-                form={form}
-            />
-        ));
+        if(page.forms != undefined){
+            return page.forms.map((form,i)=> (
+                <DynamicForm
+                    key={i}
+                    form={form}
+                    small={props.smallform}
+                    islogin_orsignup_page={props.islogin_orsignup}
+                    login={()=>{login()}}
+                    signup={()=>{signup()}}
+                    
+                />
+            ))
+        }else{
+            return (
+                <>
+                </>
+            )
+        }
     };
 
 
   return (
-    <ScrollView>
-        <View style={styles.container}>
-            {forms()}
-            {tables()}
-        </View>
-    </ScrollView>
+    <View style={styles.container}> 
+
+            <ScrollView>
+                <View style={styles.container}>
+                <Image
+                style={styles.image}
+                source={require('./../assets/images/images3.png')} 
+                /> 
+                    {forms()}
+                    {tables()}
+                </View>
+
+            </ScrollView>
+
+    </View>
+
   )
 }
 
@@ -50,7 +93,13 @@ export default function DynamicPage({page}) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: isSmallScreen ? 15 : 20,
-        backgroundColor: 'rgb(221, 221, 221)',
+        padding: isSmallScreen ? 10 : 20,
+        minHeight: '100vh',
+        alignItems:'center',
+        justifyContent:'center',
+
     },
+    image:{
+        
+    }
 });

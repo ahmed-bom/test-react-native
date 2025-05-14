@@ -7,6 +7,7 @@ const {width} = Dimensions.get('window');
 export const isSmallScreen = width < 500;
 
 import DynamicContainer from "../components1/DynamicContainer"
+import DynamicInput from '../components1/DynamicInput';
 
 export default function DynamicTable(props) {
 
@@ -74,12 +75,22 @@ export default function DynamicTable(props) {
     <DynamicContainer
       label={props.name}
     >
-      <ScrollView horizontal={true}>
-        <View>
-        {renderTableHeader()}
-        {renderTableBody()}
-        </View>
-      </ScrollView>
+      <DynamicInput
+          label={"Rechercher"}
+          type={"Rechercher"}
+      />
+      <View>
+        <ScrollView 
+        horizontal={true}
+        >
+          <View
+          style={{marginVertical:20}}
+          >
+          {renderTableHeader()}
+          {renderTableBody()}
+          </View>
+        </ScrollView>
+      </View>
     </DynamicContainer>
   );
 }
@@ -91,8 +102,8 @@ export default function DynamicTable(props) {
 const styles = StyleSheet.create({
   headerText: {
     fontSize: isSmallScreen ? 14 : 18,
-    width: isSmallScreen ? 100 : 200,
-    padding: isSmallScreen ? 15 : 20,
+    width: 200,
+    padding: isSmallScreen ? 10 : 15,
     fontWeight: 'bold',
     color: "blacke",
     textAlign: 'center',
@@ -113,9 +124,9 @@ const styles = StyleSheet.create({
 
   ligneText: {
     fontSize: isSmallScreen ? 14 : 18,
-    width: isSmallScreen ? 100 : 200,
-    padding: isSmallScreen ? 15 : 20,
-    fontWeight: 'bold',
+    width:  200,
+    padding: isSmallScreen ? 5 : 10,
+
     color: "#555",
     textAlign: 'center',
   },
