@@ -27,10 +27,20 @@ export default function DynamicButton(props) {
             icon = "plus";
             text = props.type
         break;
+        case"Sebmet":
+            button_color = 'rgb(77, 104, 255)'
+            text_color = 'white';
+            text = props.type
+            break;
+
         case "Retour":
             button_color = 'rgb(206, 206, 206)'
-            icon = "arrow-left";
-            text = props.type      
+            text = '<- '+props.type      
+            break;
+
+        case "Next":
+            button_color = 'rgb(206, 206, 206)'
+            text = props.type+' ->'      
             break;
         case "Enregistrer":
             button_color = 'rgb(0, 72, 255)'

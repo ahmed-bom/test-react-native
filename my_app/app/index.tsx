@@ -7,6 +7,7 @@ import {pages,login_signup} from './pages'
 import DynamicSadeBar from './components2/DynamicSadeBar';
 import DynamicPage from './DynamicPage'
 
+
 export default function Index() {
 
   const[page_index,setpage_index] = useState(1);
@@ -15,13 +16,13 @@ export default function Index() {
   
   const page_links = pages.map(obj => obj.name);
 
-
-  const login = ()=>{
-      setislogin(true)
+  function nex_page(){
+    setpage_index((page_index + 1)% pages.length)
   }
-
-  const signup = ()=>{
-    setislogin(true)
+  function retour(){
+    if(page_index - 1 >= 0){
+      setpage_index(page_index - 1)
+    }
   }
 
 
@@ -36,6 +37,8 @@ export default function Index() {
       >
         <DynamicPage
           page={pages[page_index]}
+          nex_page={nex_page}
+          retour={retour}
         />
       </DynamicSadeBar>
     ):
@@ -43,8 +46,7 @@ export default function Index() {
       <DynamicPage
           page={login_signup[islogin_orsignup]}
           islogin_orsignup = {set_login_signup}
-          login={()=>{login()}}
-          signup={()=>{signup()}}
+          setislogin={setislogin}
           smallform={true}
         />
     )

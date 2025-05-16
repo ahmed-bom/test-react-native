@@ -8,10 +8,15 @@ import { StyleSheet, Dimensions, View} from 'react-native';
 const { width } = Dimensions.get('window');
 export const isSmallScreen = width < 500;
 
+
+
+
 export default function DynamicForm(props) {
+
   const [inputs_list, setInternal_inputs] = useState(props.form.inputs || []);
-  const buttons_list = props.form.buttons;
   const [errors, setErrors] = useState({});
+  const buttons_list = props.form.buttons;
+
 
   useEffect(() => {
     if (props.form.inputs !== inputs_list) {
@@ -20,29 +25,25 @@ export default function DynamicForm(props) {
     }
   }, [props.form.inputs]);
 
-  const handleInputChange = (index, text) => {
+
+  const handleInputChange = (index, value) => {
     const updatedInputs = inputs_list.map((input, i) =>
-      i === index ? { ...input, value: text } : input
+      i === index ? { ...input, value: value } : input
     );
     setInternal_inputs(updatedInputs);
     // Clear any previous error for this input
     setErrors(prevErrors => ({ ...prevErrors, [inputs_list[index].name]: undefined }));
   };
 
-  const handlePickerChange = (index, itemValue) => {
-    const updatedInputs = inputs_list.map((input, i) =>
-      i === index ? { ...input, value: itemValue } : input
-    );
-    setInternal_inputs(updatedInputs);
-    // Clear any previous error for this input
-    setErrors(prevErrors => ({ ...prevErrors, [inputs_list[index].name]: undefined }));
-  };
 
+  // validate data
   const get_inputs_value = () => {
-    return inputs_list.map(input => ({
-      inp: input.label,
+    return inputs_list.map(input => (
+      {
+      inp: input.name,
       val: input.value,
-    }));
+    }
+  ));
   };
 
   const validateInput = (input) => {
@@ -70,11 +71,90 @@ export default function DynamicForm(props) {
       if (error) {
         newErrors[input.name] = error;
         isValid = false;
+        //alert('All required fields must be filled :"'+error+'"');
       }
     });
     setErrors(newErrors);
     return isValid;
   };
+
+  // giv efect 
+  const onPress_button = (type) => {
+    switch (type) {
+      case "Réinitialiser":
+        return () => {
+          const resetInputs = inputs_list.map(input => ({ ...input, value: "" }));
+          setInternal_inputs(resetInputs);
+          setErrors({}); 
+        };
+
+      case "Ajouter":
+        return () => {
+          // for same risan !?
+          props.nex_page()
+        };
+      case "Retour":
+        return () => {
+          props.retour()
+        };
+      case "Enregistrer":
+        return () => {
+          if (validateForm()) {
+            console.log(inputs_list);
+          }
+        };
+      case "Valider":
+        return () => {
+          if (validateForm()) {
+            console.log(inputs_list);
+          }
+        };
+      case "login":
+        return () => {
+          if (validateForm()) {
+            let inputs_value = get_inputs_value();
+            props.login(inputs_value);
+          } 
+        };
+      case "signup":
+        return () => {
+          if (validateForm()) {
+            let inputs_value = get_inputs_value();
+            props.signup(inputs_value);
+          }
+        };
+
+      default:
+        return () => {
+          console.log(`no typ: ${type}`);
+        };
+    }
+  };
+
+  const onPress_link = (type) => {
+    switch (type) {
+      case "login":
+        return () => {
+          props.islogin_orsignup_page(0);
+        };
+      case "signup":
+        return () => {
+          props.islogin_orsignup_page(1);
+        };
+      default:
+        return () => {
+          console.log(`no typ: ${type}`);
+        };
+    }
+  };
+
+
+
+
+
+
+
+
 
   const inputs = () => {
     return inputs_list.map((input, i) => (
@@ -85,7 +165,6 @@ export default function DynamicForm(props) {
         items={input.items}
         value={input.value}
         onChangeText={(text) => handleInputChange(i, text)}
-        onValueChange={(itemValue) => handlePickerChange(i, itemValue)}
         error={errors[input.name]} 
       />
     ));
@@ -116,86 +195,6 @@ export default function DynamicForm(props) {
     }
   };
 
-  const onPress_button = (type) => {
-    switch (type) {
-      case "Réinitialiser":
-        return () => {
-          const resetInputs = inputs_list.map(input => ({ ...input, value: "" }));
-          setInternal_inputs(resetInputs);
-          setErrors({}); 
-        };
-
-      case "Ajouter":
-        return () => {
-          if (validateForm()) {
-            let i = get_inputs_value();
-            alert(JSON.stringify(i));
-          } else {
-            alert('All required fields must be filled');
-          }
-        };
-      case "Retour":
-        return () => {};
-      case "Enregistrer":
-        return () => {
-          if (validateForm()) {
-            console.log(inputs_list);
-          } else {
-            alert('All required fields must be filled');
-          }
-        };
-      case "Valider":
-        return () => {
-          if (validateForm()) {
-            console.log(inputs_list);
-          } else {
-            alert('All required fields must be filled');
-          }
-        };
-      case "login":
-        return () => {
-          if (validateForm()) {
-            let i = get_inputs_value();
-            alert(JSON.stringify(i));
-            props.login();
-          } else {
-            alert('All required fields must be filled');
-          }
-        };
-      case "signup":
-        return () => {
-          if (validateForm()) {
-            let i = get_inputs_value();
-            alert(JSON.stringify(i));
-            props.signup();
-          } else {
-            alert('All required fields must be filled');
-          }
-        };
-
-      default:
-        return () => {
-          console.log(`no typ: ${type}`);
-        };
-    }
-  };
-
-  const onPress_link = (type) => {
-    switch (type) {
-      case "login":
-        return () => {
-          props.islogin_orsignup_page(0);
-        };
-      case "signup":
-        return () => {
-          props.islogin_orsignup_page(1);
-        };
-      default:
-        return () => {
-          console.log(`no typ: ${type}`);
-        };
-    }
-  };
 
   return (
     <DynamicContainer
