@@ -53,7 +53,7 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
 
-    return {"message":"user created successfully"}
+    return {"message": 200}
 
 
 
@@ -64,7 +64,7 @@ def login(user: UserCreate, db: Session = Depends(get_db)):
     if db_user is None:
         raise HTTPException(
             status_code=404,
-            detail="user name")
+            detail="Incorrect user name")
     
     is_corect_password = get_hashed_password(user.password) == db_user.password
  
@@ -74,7 +74,7 @@ def login(user: UserCreate, db: Session = Depends(get_db)):
             detail="Incorrect password"
         )
     
-    return {"login" : True}
+    return {"login" : 200}
 
 
 @app.post("/declarations/", response_model=DeclarationPeche)
@@ -94,54 +94,54 @@ def read_declaration(declaration_id: int, db: Session = Depends(get_db)):
     return db_declaration
 
 @app.get("/declarations/", response_model=List[DeclarationPeche])
-def read_declarations(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    declarations = db.query(Declaration_peche_model).offset(skip).limit(limit).all()
+def read_declarations(db: Session = Depends(get_db)):
+    declarations = db.query(Declaration_peche_model).all()
     return declarations
 
-@app.get("/declarations/search/", response_model=List[DeclarationPeche])
-def search_declarations(
-    numero_visa: Optional[str] = Query(None),
-    date_declaration: Optional[date] = Query(None),
-    id_refnavire: Optional[int] = Query(None),
-    id_refentitedebarq: Optional[int] = Query(None),
-    id_refentitedeclar: Optional[int] = Query(None),
-    id_reftypedeclar: Optional[int] = Query(None),
-    date_debut_maree: Optional[date] = Query(None),
-    date_fin_maree: Optional[date] = Query(None),
-    date_debarq: Optional[date] = Query(None),
-    date_visa: Optional[date] = Query(None),
-    declare_par: Optional[str] = Query(None),
-    id_refregistre: Optional[int] = Query(None),
-    etat: Optional[str] = Query(None),
-    db: Session = Depends(get_db)
-):
+@app.post("/declarations/search/", response_model=List[DeclarationPeche])
+def search_declarations(declaration:Declaration_Peche_Create,db: Session = Depends(get_db)):
+    
+    
     query = db.query(Declaration_peche_model)
-    if numero_visa is not None:
-        query = query.filter(Declaration_peche_model.NUMEROVISA.like(f"%{numero_visa}%"))
-    if date_declaration is not None:
-        query = query.filter(Declaration_peche_model.DATEDECLARATION == date_declaration)
-    if id_refnavire is not None:
-        query = query.filter(Declaration_peche_model.ID_REFNAVIRE == id_refnavire)
-    if id_refentitedebarq is not None:
-        query = query.filter(Declaration_peche_model.ID_REFENTITEDEBARQ == id_refentitedebarq)
-    if id_refentitedeclar is not None:
-        query = query.filter(Declaration_peche_model.ID_REFENTITEDECLAR == id_refentitedeclar)
-    if id_reftypedeclar is not None:
-        query = query.filter(Declaration_peche_model.ID_REFTYPEDECLAR == id_reftypedeclar)
-    if date_debut_maree is not None:
-        query = query.filter(Declaration_peche_model.DATEDEBUTMAREE == date_debut_maree)
-    if date_fin_maree is not None:
-        query = query.filter(Declaration_peche_model.DATEFINMAREE == date_fin_maree)
-    if date_debarq is not None:
-        query = query.filter(Declaration_peche_model.DATEDEBARQ == date_debarq)
-    if date_visa is not None:
-        query = query.filter(Declaration_peche_model.DATEVISA == date_visa)
-    if declare_par is not None:
-        query = query.filter(Declaration_peche_model.DECLAREPAR.like(f"%{declare_par}%"))
-    if id_refregistre is not None:
-        query = query.filter(Declaration_peche_model.ID_REFREGISTRE == id_refregistre)
-    if etat is not None:
-        query = query.filter(Declaration_peche_model.ETAT == etat)
+    if declaration.NUMEROVISA is not "":
+        query = query.filter(Declaration_peche_model.NUMEROVISA.like(f"%{declaration.NUMEROVISA}%"))
+    
+    if declaration.DATEDECLARATION is not "":
+        query = query.filter(Declaration_peche_model.DATEDECLARATION == declaration.DATEDECLARATION)
+    
+    if declaration.ID_REFNAVIRE is not "":
+        query = query.filter(Declaration_peche_model.ID_REFNAVIRE == declaration.ID_REFNAVIRE)
+    
+    if declaration.ID_REFENTITEDEBARQ is not "":
+        query = query.filter(Declaration_peche_model.ID_REFENTITEDEBARQ == declaration.ID_REFENTITEDEBARQ)
+    
+    if declaration.ID_REFENTITEDECLAR is not "":
+        query = query.filter(Declaration_peche_model.ID_REFENTITEDECLAR == declaration.ID_REFENTITEDECLAR)
+    
+    if declaration.ID_REFTYPEDECLAR is not "":
+        query = query.filter(Declaration_peche_model.ID_REFTYPEDECLAR == declaration.ID_REFTYPEDECLAR)
+    
+    if declaration.DATEDEBUTMAREE is not "":
+        query = query.filter(Declaration_peche_model.DATEDEBUTMAREE == declaration.DATEDEBUTMAREE)
+    
+    if declaration.DATEFINMAREE is not "":
+        query = query.filter(Declaration_peche_model.DATEFINMAREE == declaration.DATEFINMAREE)
+    
+    if declaration.DATEDEBARQ is not "":
+        query = query.filter(Declaration_peche_model.DATEDEBARQ == declaration.DATEDEBARQ)
+    
+    if declaration.DATEVISA is not "":
+        query = query.filter(Declaration_peche_model.DATEVISA == declaration.DATEVISA)
+    
+    if declaration.DECLAREPAR is not "":
+        query = query.filter(Declaration_peche_model.DECLAREPAR.like(f"%{declaration.DECLAREPAR}%"))
+    
+    if declaration.ID_REFREGISTRE is not "":
+        query = query.filter(Declaration_peche_model.ID_REFREGISTRE == declaration.ID_REFREGISTRE)
+    
+    if declaration.ETAT is not "":
+        query = query.filter(Declaration_peche_model.ETAT == declaration.ETAT)
+    
     return query.all()
 
 
@@ -166,8 +166,8 @@ def read_produit(produit_id: int, db: Session = Depends(get_db)):
     return db_produit
 
 @app.get("/produits/", response_model=List[PE_PRD_SOURCEESPDC_Read])
-def read_produits(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    produits = db.query(PE_PRD_SOURCEESPDC_model).offset(skip).limit(limit).all()
+def read_produits( db: Session = Depends(get_db)):
+    produits = db.query(PE_PRD_SOURCEESPDC_model).all()
     return produits
 
 @app.get("/produits/search/", response_model=List[PE_PRD_SOURCEESPDC_Read])

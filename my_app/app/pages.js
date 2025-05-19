@@ -34,11 +34,7 @@ const login = {
             {
                 name : "name",
                 type : "default",
-            },  
-            {
-                name : "email",
-                type : "email",
-            },   
+            },    
             {
                 name : "password",
                 type : "password",
@@ -61,60 +57,6 @@ const login = {
     }
     
  }
-
-const test_page = {
-
-    name : "test",
-    form : {
-        name : "form 1",
-        inputs: [   
-            {
-                name : "input 1",
-                type : "default",
-                value : "",
-            },   
-            {
-                name : "input 2",
-                type : "picker",
-                value : "",
-                items : [
-                            "v1",
-                            "v2",
-                            "v3",
-                        ],
-
-            },   
-            {
-                name : "input 1",
-                type : "default",
-                value : "",
-            },   
-            {
-                name : "input 2",
-                type : "picker",
-                value : "",
-                items : [
-                            "v1",
-                            "v2",
-                            "v3",
-                        ],
-
-            },     
-            {
-                name : "input 2",
-                type : "picker",
-                value : "",
-                items : [
-                            "v1",
-                            "v2",
-                            "v3",
-                        ],
-
-            },                 
-        ],
-        buttons:["Enregistrer"]
-    },
-};
 
 const Déclaration_capture_recherche = {
 
@@ -164,6 +106,7 @@ const Déclaration_capture_recherche = {
     
     table : {
             name : "Résulta",
+            type: "declarations",
             header : [],
             data : []
     },
@@ -228,6 +171,7 @@ const add_éspeces ={
         },
     table :{
             name : "Lignes",
+            type: "declarations",
             header : [],
             data : []
     },
@@ -332,6 +276,7 @@ const new_Déclaration_capture = {
     table :
     {
         name : "Recherche navire",
+        type: "declarations",
         header : [],
         data : []
     },
@@ -345,5 +290,5 @@ const new_Déclaration_capture = {
 
 
 
-export const pages = [test_page,Déclaration_capture_recherche,new_Déclaration_capture,add_éspeces];
+export const pages = [Déclaration_capture_recherche,new_Déclaration_capture,add_éspeces];
 export const login_signup = [login,signup];

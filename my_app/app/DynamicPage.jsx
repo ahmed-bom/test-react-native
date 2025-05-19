@@ -9,23 +9,59 @@ export const isSmallScreen = width < 500;
 import DynamicTable from './components2/DynamicTable';
 import DynamicForm from './components2/DynamicForm';
 
+
+function send_to_api(target, content, method) {
+  let M = {
+    method: method,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  };
+
+  if (method === 'POST') {
+    M["body"] = JSON.stringify(content);
+  }
+
+  
+  return fetch('http://127.0.0.1:8000/' + target, M)
+    .then((response) => {
+      return response.json();
+    })
+    .then((data) => {
+      return data;
+    })
+    .catch((error) => {
+      return 'server error';
+    });
+}
+
+
+
+
+
+
 export default function DynamicPage(props) {
- 
+  
+  const t = props.page.table
+
+    const [tableData, setTableData] = useState(t ? t.data : [[]]);
+    const [tableHeader, setTableHeader] = useState(t ? t.header : []);
+
     const page = props.page;
 
     const table = () => {
-        let t = props.page.table
             return (<>
                 {t && (
                     <DynamicTable
                         name={t.name}
-                        header={t.header}
-                        data={t.data}
+                        header={tableHeader}
+                        data={tableData}
                     />
                 )}
             </>);
 
     }
+
     const form = () => {
         let f = props.page.form
         
@@ -35,8 +71,9 @@ export default function DynamicPage(props) {
                 form={f}
                 small={props.smallform}
                 islogin_orsignup_page={props.islogin_orsignup}
-                login={login}
-                signup={signup}
+                login_signup ={login_signup}
+                serch_table_data ={serch_table_data}
+                add_table_data = {add_table_data}
                 nex_page={props.nex_page}
                 retour={props.retour}
                 />
@@ -64,6 +101,37 @@ export default function DynamicPage(props) {
     }
 
 
+    const login_signup = (log_sin,values)=>{
+      const post = {
+        name : values['name'],
+        password: values['password'],
+      };
+     send_to_api(log_sin,post,'POST')
+     .then((data) => {
+        if (data == 'server error')alert(data);
+        if(data.detail)alert(data.detail);
+        else props.setislogin(true);
+      })
+    }
+
+
+    const serch_table_data = (serch_obj) =>{
+      send_to_api(t.type + "/search/",serch_obj,'POST')
+      .then((data) => {
+        if(data == 'server error') alert(data);
+        setTableData(data.map(d => Object.values(d)));
+        setTableHeader( Object.keys(data[0]));
+      })
+    }
+
+    const add_table_data = (serch_obj) =>{
+      let data = send_to_api(t.type,serch_obj,'POST')
+      .then((data) => {
+        if(data == 'server error') alert(data);
+        setTableData([...tableData,Object.values(data)]);
+      })
+    } 
+
     const onPress_button = (type) => {
         switch (type) {    
           case "Next":
@@ -84,42 +152,43 @@ export default function DynamicPage(props) {
             return () => {}
         };
       };
+      
 
 
 
-
-
-
-
-    const login = (inputs_value) =>{
-        console.log(inputs_value)
+      const creat_declaration = ()=>{
         const post = {
-            name : inputs_value[0].val,
-            password: inputs_value[1].val,
-        };
+          NUMEROVISA: "string",
+          DATEDECLARATION: "2025-05-18",
+          ID_REFNAVIRE: 0,
+          ID_REFENTITEDEBARQ: 0,
+          ID_REFENTITEDECLAR: 0,
+          ID_REFTYPEDECLAR: 0,
+          DATEDEBUTMAREE: "2025-05-18",
+          DATEFINMAREE: "2025-05-18",
+          DATEDEBARQ: "2025-05-18",
+          DATEVISA: "2025-05-18",
+          DECLAREPAR: "string",
+          ID_REFREGISTRE: 0,
+          ETAT: "string"
+        }
 
-          
-          fetch('http://127.0.0.1:8000/login', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(post),
+        
+        fetch('http://127.0.0.1:8000/declarations', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(post),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data)  
           })
-            .then((response) => response.json())
-            .then((data) => {
-                props.setislogin(true)
-                alert(JSON.stringify(data))
-            })
-            .catch((error) => {
-                alert('server error');
-            });
-    
-    }
-    const signup = (inputs_value)=>{
-        props.setislogin(true)
-    }
-
+          .catch((error) => {
+              alert('server error');
+          });
+      }
 
 
 

@@ -38,12 +38,9 @@ export default function DynamicForm(props) {
 
   // validate data
   const get_inputs_value = () => {
-    return inputs_list.map(input => (
-      {
-      inp: input.name,
-      val: input.value,
-    }
-  ));
+    let inplist = {}
+    inputs_list.map(input => ( inplist[input.name] = input.value ));
+    return inplist
   };
 
   const validateInput = (input) => {
@@ -90,13 +87,51 @@ export default function DynamicForm(props) {
 
       case "Ajouter":
         return () => {
-          // for same risan !?
-          props.nex_page()
+          //if (validateForm())
+            if(true) {
+            const inp = get_inputs_value()
+            const post = {
+              NUMEROVISA: inp["Numero Visa"],
+              DATEDECLARATION: "2025-05-19",
+              ID_REFNAVIRE: 1,
+              ID_REFENTITEDEBARQ: 1,
+              ID_REFENTITEDECLAR: 1,
+              ID_REFTYPEDECLAR: 1,
+              DATEDEBUTMAREE: "2025-05-19",
+              DATEFINMAREE: "2025-05-19",
+              DATEDEBARQ: "2025-05-19",
+              DATEVISA: "2025-05-19",
+              DECLAREPAR:"!",
+              ID_REFREGISTRE: 1,
+              ETAT: "no valider"
+            }
+
+            props.add_table_data(post);
+          }
         };
-      case "Retour":
-        return () => {
-          props.retour()
-        };
+      case "Rechercher":
+        return ()=>
+        {
+
+        const inp = get_inputs_value()
+          const post = {
+              NUMEROVISA: inp["Numero Visa"],
+              DATEDECLARATION: "2025-05-19",
+              ID_REFNAVIRE: 1,
+              ID_REFENTITEDEBARQ: 1,
+              ID_REFENTITEDECLAR: 1,
+              ID_REFTYPEDECLAR: 1,
+              DATEDEBUTMAREE: "2025-05-19",
+              DATEFINMAREE: "2025-05-19",
+              DATEDEBARQ: "2025-05-19",
+              DATEVISA: "2025-05-19",
+              DECLAREPAR:"!",
+              ID_REFREGISTRE: 1,
+              ETAT: "no valider"
+          }
+        props.serch_table_data(post)
+        }
+        break
       case "Enregistrer":
         return () => {
           if (validateForm()) {
@@ -112,15 +147,13 @@ export default function DynamicForm(props) {
       case "login":
         return () => {
           if (validateForm()) {
-            let inputs_value = get_inputs_value();
-            props.login(inputs_value);
+            props.login_signup("login",get_inputs_value());
           } 
         };
       case "signup":
         return () => {
           if (validateForm()) {
-            let inputs_value = get_inputs_value();
-            props.signup(inputs_value);
+            props.login_signup("register",get_inputs_value());
           }
         };
 
@@ -164,7 +197,7 @@ export default function DynamicForm(props) {
         type={input.type}
         items={input.items}
         value={input.value}
-        onChangeText={(text) => handleInputChange(i, text)}
+        onChangeText={(text) => handleInputChange(i, text)} // TODO
         error={errors[input.name]} 
       />
     ));

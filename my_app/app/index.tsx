@@ -10,7 +10,7 @@ import DynamicPage from './DynamicPage'
 
 export default function Index() {
 
-  const[page_index,setpage_index] = useState(1);
+  const[page_index,setpage_index] = useState(2);
   const [islogin_orsignup,set_login_signup] = useState(0);
   const [islogin,setislogin] =useState(true);
   

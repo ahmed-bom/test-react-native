@@ -15,7 +15,7 @@ export default function DynamicTable(props) {
   const bodyColor2 ='rgb(249, 249, 255)';
 
   const renderTableHeader = () => {
-
+    console.log(props.header)
     return (
       <View style={styles.lignesHeader}>
         {
@@ -84,7 +84,9 @@ export default function DynamicTable(props) {
         horizontal={true}
         >
           <View
-          style={{marginVertical:20}}
+          style={{
+            marginVertical:20
+          }}
           >
           {renderTableHeader()}
           {renderTableBody()}
@@ -124,7 +126,7 @@ const styles = StyleSheet.create({
 
   ligneText: {
     fontSize: isSmallScreen ? 14 : 18,
-    width:  200,
+    width: 200,
     padding: isSmallScreen ? 5 : 10,
 
     color: "#555",
