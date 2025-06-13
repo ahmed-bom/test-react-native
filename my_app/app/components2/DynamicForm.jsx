@@ -1,51 +1,55 @@
+
 import React, { useState, useEffect } from 'react';
+import DateTimePickerModal from "react-native-modal-datetime-picker";
+// TODO date
 import DynamicContainer from '../components1/DynamicContainer';
 import DynamicInput from '../components1/DynamicInput';
 import DynamicButton from '../components1/DynamicButton';
 import DynamicLink from '../components1/DynamicLink';
+
 import { StyleSheet, Dimensions, View} from 'react-native';
-
-const { width } = Dimensions.get('window');
-export const isSmallScreen = width < 500;
-
-
 
 
 export default function DynamicForm(props) {
 
-  const [inputs_list, setInternal_inputs] = useState(props.form.inputs || []);
+  const [inputs_list, set_inputs] = useState(props.form.inputs);
   const [errors, setErrors] = useState({});
   const buttons_list = props.form.buttons;
 
 
   useEffect(() => {
-    if (props.form.inputs !== inputs_list) {
-      setInternal_inputs(props.form.inputs || []);
-      setErrors({});
-    }
+  	set_inputs(props.form.inputs);
+    setErrors({})
   }, [props.form.inputs]);
-
 
   const handleInputChange = (index, value) => {
     const updatedInputs = inputs_list.map((input, i) =>
       i === index ? { ...input, value: value } : input
     );
-    setInternal_inputs(updatedInputs);
-    // Clear any previous error for this input
+    set_inputs(updatedInputs);
     setErrors(prevErrors => ({ ...prevErrors, [inputs_list[index].name]: undefined }));
   };
 
 
-  // validate data
+  const handlReinitialiser = (Value)=>{
+    const cop_inputs_list = [...inputs_list]
+    for (let i = 0; i < inputs_list.length; i++) {
+      cop_inputs_list[i].value = '';
+    }
+    set_inputs(cop_inputs_list);
+    setErrors({});
+  };
+
+
   const get_inputs_value = () => {
     let inplist = {}
-    inputs_list.map(input => ( inplist[input.name] = input.value ));
+    inputs_list.map(input => ( inplist[input.name.replace(/ /g, "_")] = input.value ));
     return inplist
   };
 
   const validateInput = (input) => {
     if (!input.value) {
-      return 'this field is required'
+      return '*'
     }
     switch (input.type) {
       case 'email':
@@ -67,160 +71,130 @@ export default function DynamicForm(props) {
       const error = validateInput(input);
       if (error) {
         newErrors[input.name] = error;
-        isValid = false;
-        //alert('All required fields must be filled :"'+error+'"');
+        isValid = false; 
       }
     });
     setErrors(newErrors);
     return isValid;
   };
 
-  // giv efect 
-  const onPress_button = (type) => {
+
+const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+const [selectedDateIndex, setSelectedDateIndex] = useState(null);
+
+// Show the date picker
+const showDatePicker = (index) => {
+  setSelectedDateIndex(index);
+  setDatePickerVisibility(true);
+};
+
+// Hide the date picker
+const hideDatePicker = () => {
+  setDatePickerVisibility(false);
+  setSelectedDateIndex(null);
+};
+
+// Handle selected date
+const handleConfirm = (date) => {
+  const formattedDate = date.toISOString().split('T')[0]; // Format YYYY-MM-DD
+  handleInputChange(selectedDateIndex, formattedDate);
+  hideDatePicker();
+};
+
+
+
+
+const handlInputOnPress = (type, index) => {
+  if (type === 'date') {
+    showDatePicker(index);
+  }
+};
+
+
+  const handlButtonOnPress = (type) => {
+
+    let inputs 
+
     switch (type) {
-      case "Réinitialiser":
-        return () => {
-          const resetInputs = inputs_list.map(input => ({ ...input, value: "" }));
-          setInternal_inputs(resetInputs);
-          setErrors({}); 
-        };
-
-      case "Ajouter":
-        return () => {
-          //if (validateForm())
-            if(true) {
-            const inp = get_inputs_value()
-            const post = {
-              NUMEROVISA: inp["Numero Visa"],
-              DATEDECLARATION: "2025-05-19",
-              ID_REFNAVIRE: 1,
-              ID_REFENTITEDEBARQ: 1,
-              ID_REFENTITEDECLAR: 1,
-              ID_REFTYPEDECLAR: 1,
-              DATEDEBUTMAREE: "2025-05-19",
-              DATEFINMAREE: "2025-05-19",
-              DATEDEBARQ: "2025-05-19",
-              DATEVISA: "2025-05-19",
-              DECLAREPAR:"!",
-              ID_REFREGISTRE: 1,
-              ETAT: "no valider"
-            }
-
-            props.add_table_data(post);
-          }
-        };
-      case "Rechercher":
-        return ()=>
-        {
-
-        const inp = get_inputs_value()
-          const post = {
-              NUMEROVISA: inp["Numero Visa"],
-              DATEDECLARATION: "2025-05-19",
-              ID_REFNAVIRE: 1,
-              ID_REFENTITEDEBARQ: 1,
-              ID_REFENTITEDECLAR: 1,
-              ID_REFTYPEDECLAR: 1,
-              DATEDEBUTMAREE: "2025-05-19",
-              DATEFINMAREE: "2025-05-19",
-              DATEDEBARQ: "2025-05-19",
-              DATEVISA: "2025-05-19",
-              DECLAREPAR:"!",
-              ID_REFREGISTRE: 1,
-              ETAT: "no valider"
-          }
-        props.serch_table_data(post)
-        }
+      case 'se connecter':
+      case "s'inscrire":
+        if (!validateForm()) return null
+        inputs = get_inputs_value()
+        props.api_cole(type,type,'POST',inputs);
+        break;
+      case 'Rechercher':
+        inputs = get_inputs_value()
+        props.api_cole(type,"declarations/search/",'GET',inputs);
         break
+      case 'Ajouter Éspeces':
+        if (!validateForm()) return null
+        inputs = get_inputs_value();
+        props.api_cole("Ajouter Déclaration","declarations/",'POST',inputs);
+      case 'Ajouter Déclaration':
       case "Enregistrer":
-        return () => {
-          if (validateForm()) {
-            console.log(inputs_list);
-          }
-        };
-      case "Valider":
-        return () => {
-          if (validateForm()) {
-            console.log(inputs_list);
-          }
-        };
-      case "login":
-        return () => {
-          if (validateForm()) {
-            props.login_signup("login",get_inputs_value());
-          } 
-        };
-      case "signup":
-        return () => {
-          if (validateForm()) {
-            props.login_signup("register",get_inputs_value());
-          }
-        };
+        props.nex_page()
+        break
+      case 'Ajouter':
+        if (!validateForm()) return null
+        inputs = get_inputs_value()
+        props.api_cole('Ajouter Éspeces','especes/','POST',inputs);
+        break
+      case 'Réinitialiser':
+        handlReinitialiser()
+        break;
 
+    
       default:
-        return () => {
-          console.log(`no typ: ${type}`);
-        };
+        console.log('-_-');
+        break;
     }
-  };
-
-  const onPress_link = (type) => {
+  }
+  const handlLinkOnPress = (type) => {
     switch (type) {
-      case "login":
-        return () => {
-          props.islogin_orsignup_page(0);
-        };
-      case "signup":
-        return () => {
-          props.islogin_orsignup_page(1);
-        };
+      case 'se connecter':
+      case "s'inscrire":
+        props.nex_page()
+        break;
+    
       default:
-        return () => {
-          console.log(`no typ: ${type}`);
-        };
+        console.log('o-o');
+        break;
     }
-  };
-
-
-
-
-
-
-
-
+  }
 
   const inputs = () => {
-    return inputs_list.map((input, i) => (
-      <DynamicInput
-        key={i}
-        label={input.name}
-        type={input.type}
-        items={input.items}
-        value={input.value}
-        onChangeText={(text) => handleInputChange(i, text)} // TODO
-        error={errors[input.name]} 
-      />
-    ));
-  };
+      return inputs_list.map((input, i) => (
+        <DynamicInput
+          key={i}
+          label={input.name}
+          type={input.type}
+          items={input.items}
+          internalValue={input.value}
+          onChangeText={(text) => handleInputChange(i, text)}
+          onPress={()=>handlInputOnPress(input.type,i)}
+          error={errors[input.name]} 
+        />
+      ));
+    };
 
   const buttons = () => {
     return buttons_list.map((type, i) => (
       <DynamicButton
         key={i}
         type={type}
-        onPress={() => onPress_button(type)}
+        onPress={() => handlButtonOnPress(type)}
       />
     ));
   };
 
   const links = () => {
     if (props.form.Links !== undefined) {
-      return props.form.Links.map((link, i) => (
+      return props.form.Links.map((Item, i) => (
         <DynamicLink
           key={i}
-          text={link.text}
-          link={link.link}
-          onPress={() => onPress_link(link.link)}
+          text={Item.text}onPresslink
+          link={Item.link}
+          onPress={() => handlLinkOnPress(Item.link)}
         />
       ));
     } else {
@@ -233,10 +207,15 @@ export default function DynamicForm(props) {
     <DynamicContainer
       label={props.form.name}
       style={props.containerStyle}
-      small={props.small}
     >
       <View style={styles.container}>
         {inputs()}
+        <DateTimePickerModal
+          isVisible={isDatePickerVisible}
+          mode="date"
+          onConfirm={handleConfirm}
+          onCancel={hideDatePicker}
+        />
       </View>
       <View style={styles.container}>
         {buttons()}

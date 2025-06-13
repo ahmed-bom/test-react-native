@@ -4,17 +4,17 @@ import React, { useState } from 'react';
 import { Feather } from '@expo/vector-icons';
 import {pages,login_signup} from './pages'
 
-import DynamicSadeBar from './components2/DynamicSadeBar';
+import DynamicSadeBar from './DynamicSadeBar';
 import DynamicPage from './DynamicPage'
 
 
 export default function Index() {
 
-  const[page_index,setpage_index] = useState(2);
-  const [islogin_orsignup,set_login_signup] = useState(0);
-  const [islogin,setislogin] =useState(true);
+  const[page_index,setpage_index] = useState(0);
+  const [login_or_signup,set_login_or_signup] = useState(0);
+  const [islogin,setislogin] =useState(false);
   
-  const page_links = pages.map(obj => obj.name);
+  const pages_names = pages.map(obj => obj.name);
 
   function nex_page(){
     setpage_index((page_index + 1)% pages.length)
@@ -30,10 +30,10 @@ export default function Index() {
     <>
     {islogin ? (
       <DynamicSadeBar
-        links={page_links}
+        links={pages_names}
         pageIndex={page_index}
         setpageIndex={setpage_index}
-        setislogin={setislogin}
+        logout={()=>setislogin(false)}
       >
         <DynamicPage
           page={pages[page_index]}
@@ -44,11 +44,10 @@ export default function Index() {
     ):
     (
       <DynamicPage
-          page={login_signup[islogin_orsignup]}
-          islogin_orsignup = {set_login_signup}
-          setislogin={setislogin}
-          smallform={true}
-        />
+          page={login_signup[login_or_signup]}
+          nex_page = {()=>set_login_or_signup((login_or_signup+1)%2)}
+          login={()=>setislogin(true)}
+      />
     )
   }
   </>

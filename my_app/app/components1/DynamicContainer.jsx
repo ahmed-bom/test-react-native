@@ -9,7 +9,7 @@ export default function DynamicContainer(props) {
 
   return (
     <View 
-      style={props.small ? styles.scontainer:styles.Container}
+      style={styles.Container}
     >
       <Text style={styles.ContainerTitre}>{props.label}</Text>
       <View style={[styles.Containerbody,props.style]}>
@@ -29,7 +29,7 @@ export const styles = StyleSheet.create({
   Container: {
     width: isSmallScreen ?"100%":"80%",
     paddingHorizontal:isSmallScreen ? 0 : 15,
-    marginVertical:isSmallScreen ? 20 : 30,
+    marginVertical: 30,
   },
   scontainer:{
     width: isSmallScreen ?"100%":"33%",

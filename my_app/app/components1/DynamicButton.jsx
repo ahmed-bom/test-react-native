@@ -8,10 +8,10 @@ export const isSmallScreen = width < 500;
 
 export default function DynamicButton(props) {
 
-    let button_color = "rgb(255, 255, 255)"
-    let text_color = 'black'
-    let text = "no type"
-    let icon = ''
+    let button_color 
+    let text_color 
+    let text 
+    let icon 
    
     
     switch (props.type) {
@@ -27,31 +27,17 @@ export default function DynamicButton(props) {
             icon = "plus";
             text = props.type
         break;
-        case"Sebmet":
-            button_color = 'rgb(77, 104, 255)'
-            text_color = 'white';
-            text = props.type
-            break;
 
-        case "Retour":
-            button_color = 'rgb(206, 206, 206)'
-            text = '<- '+props.type      
-            break;
-
-        case "Next":
-            button_color = 'rgb(206, 206, 206)'
-            text = props.type+' ->'      
-            break;
         case "Enregistrer":
-            button_color = 'rgb(0, 72, 255)'
+            button_color = 'rgb(226, 87, 0)'
             text_color = 'white';
-            icon = "download"
             text = props.type
         break;
         case "Valider":
             button_color = 'rgb(0, 187, 44)'
             text_color = 'white';
             text = props.type
+            icon  = false
             break;  
         case "Rechercher":
             button_color = 'rgb(74, 165, 255)'
@@ -60,13 +46,18 @@ export default function DynamicButton(props) {
             icon = "zoom-in"
             break
         case "login":
-            button_color = 'rgb(74, 165, 255)'
-            text_color = 'white';
-            text = props.type
         case "signup":
             button_color = 'rgb(74, 165, 255)'
             text_color = 'white';
             text = props.type
+            icon  = false
+            break
+        default:
+            button_color = 'rgb(77, 104, 255)'
+            text_color = 'white';
+            text = props.type
+            icon  = false
+            break;
 
     }
 
@@ -74,14 +65,38 @@ export default function DynamicButton(props) {
 
   return (
         <TouchableOpacity 
-            style={[styles.button,{backgroundColor: button_color}]} 
-            onPress={props.onPress()}
+            style=  {[
+                        styles.button,
+                        {
+                            backgroundColor: props.button_color ? props.button_color : button_color
+                        }
+                    ]} 
+
+            onPress={props.onPress}
             key={props.key}
         >
-            {icon !== '' && 
-                <Feather name={icon} size={20} color={text_color} />
+            {
+                icon && 
+                    <Feather 
+                        name={icon} 
+                        size={20} 
+                        color={
+                            props.text_color ? props.text_color : text_color
+                        } 
+                    />
             }
-            <Text style={[styles.buttonText,{color: text_color}]}>{text}</Text>
+
+            <Text style={[
+                            styles.buttonText,
+                            {color:  props.text_color ? props.text_color : text_color}
+                        ]}
+            >
+                
+                {
+                    props.text ? props.text : text
+                }
+
+            </Text>
         </TouchableOpacity>
     )
 }

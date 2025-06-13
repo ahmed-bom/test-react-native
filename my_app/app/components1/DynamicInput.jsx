@@ -1,63 +1,29 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { Feather } from '@expo/vector-icons';
-import DateTimePicker from '@react-native-community/datetimepicker';
 
-const { width } = Dimensions.get('window');
-export const isSmallScreen = width < 500;
 
 const DynamicInput = (props) => {
 
   const [isFocused, setIsFocused] = useState(false);
-  const [internalValue, setInternalValue] = useState(props.value || '');
-  const [showDatePicker, setShowDatePicker] = useState(false);
+  const keyboar = get_keyboar_inf(props.type);
 
-  const isPicker = props.type === 'picker';
-  const isDate = props.type === 'date';
-
-
-  
-  useEffect(() => {
-    if (props.value !== internalValue) {
-      setInternalValue(props.value || '');
-    }
-  }, [props.value]);
-
-
-  const handleInputChange = (value) => {
-
-    switch (props.type) {
-      case 'picker':
-        if (props.onValueChange) {props.onValueChange(value)}
-        else{setInternalValue(value);}
-        break;
-      case 'date':
-        if (props.onChangeText) {props.onChangeText(""+value.nativeEvent.timestamp)}
-        else{setInternalValue(""+value.nativeEvent.timestamp);}
-        setShowDatePicker(false);
-        break;
-      default:
-        if (props.onChangeText) {props.onChangeText(value)}
-        else{setInternalValue(value);}
-        break;
-    }
-  };
 
 
   const renderPickerItems = () => {
     return props.items ? props.items.map((item, index) => (
       <Picker.Item key={index} label={item} value={item} />
-    )) : null;
+    )) : <></>;
   };
 
-  const handleFocus = () => {
-    setIsFocused(true);  
-    if (props.onFocus) {
-      props.onFocus();
-    }
-    if (props.type == 'date') {
-      setShowDatePicker(true);
+  const handleOnPress = () => {
+    
+    if (props.onPress) {
+      props.onPress();
+    }else{
+      setIsFocused(true);  
     }
   };
 
@@ -71,22 +37,108 @@ const DynamicInput = (props) => {
 
 
   const handleClear = () => {
-    setInternalValue('');
-    if (props.onClear) {
-      props.onClear();
-    } else if (props.onChangeText) {
+    if (props.onChangeText) {
       props.onChangeText('');
     }
   };
 
+  const handleChange = (value) =>{
+    if (props.onChangeText) {
+      props.onChangeText(value);
+    }
+  }
 
+  
+  
+  return (
+    <View style={styles.inputBlock}>
+      {
+      props.label && 
+        <Text style={styles.label}>
+          {props.label}
+        </Text>
+      }
+
+      <View style={[styles.inputContainer, isFocused && styles.focusedInputContainer]}>
+        {
+          keyboar.rightIcon ? (
+            <View style={styles.rightIconContainer}>
+              <Feather name={keyboar.rightIcon} size={16} color="gray" />
+            </View>
+          ):(
+            <View style={styles.rightIconContainer}>
+            </View>
+          )
+        }
+        {
+          props.type == 'picker' ?(
+            <View
+              key={props.key}
+              style={styles.input}
+            >
+              <Picker
+                selectedValue={props.internalValue}
+                onValueChange={handleChange}
+              >
+                <Picker.Item label={''} value={''} />
+                {renderPickerItems()}
+              </Picker>
+            </View>
+        ) :
+        ( props.type == 'date' ? (
+            <TouchableOpacity onPress={handleOnPress} style={styles.input}>
+              <Text style={styles.date}>
+                {props.internalValue ? props.internalValue : '' }
+              </Text>
+            </TouchableOpacity>
+          ) : 
+          ( <TextInput
+              style={styles.input}
+              value={props.internalValue}
+              keyboardType={keyboar.Type}
+              secureTextEntry={keyboar.secureTextEntry}
+              onPress={handleOnPress}
+              autoCapitalize={keyboar.autoCapitalize}
+              onChangeText={handleChange}
+              onBlur={handleBlur}
+            />
+          )
+        )}
+
+        {
+           props.type != 'picker' &&(
+            <TouchableOpacity style={styles.clearButton} onPress={handleClear}>
+              <Feather name="x" size={16} color="gray" />
+            </TouchableOpacity>
+          )
+        }
+
+
+
+      </View>
+
+      {
+        props.error && 
+          <Text style={styles.errorText}>
+            {props.error}
+          </Text>
+      }
+    </View>
+  );
+};
+
+
+export default DynamicInput;
+
+
+const get_keyboar_inf = (type_input) => {
 
   let keyboardType = 'default';
   let secureTextEntry = false;
   let autoCapitalize = 'sentences';
-  let rightIcon = null;
+  let rightIcon = 'edit-2';
 
-  switch (props.type) {
+  switch (type_input) {
     case 'email':
       keyboardType = 'email-address';
       autoCapitalize = 'none';
@@ -107,113 +159,86 @@ const DynamicInput = (props) => {
     case "Rechercher":
       rightIcon = "zoom-in";
       break;
-    case "date":
-      rightIcon = "calendar";
-      keyboardType = "" // romov keyboard
-      break;
+    case 'date':
+      rightIcon = "calendar"
+      break
+    case 'picker':
+      rightIcon = false
+      break
+
   }
 
 
+  return {
+            Type : keyboardType,
+            secureTextEntry : secureTextEntry,
+            autoCapitalize : autoCapitalize,
+            rightIcon : rightIcon,   
+          }
+}
 
-  return (
-    <View style={styles.inputBlock}>
-      {props.label && <Text style={styles.label}>{props.label}</Text>}
-      <View style={[styles.inputContainer, isFocused && isSmallScreen && styles.focusedInputContainer]}>
-        {isPicker ? (
-          <Picker
-            key={props.key}
-            selectedValue={internalValue}
-            style={styles.input}
-            onValueChange={handleInputChange}
-            enabled={!props.disabled}
-          >
-            <Picker.Item label={''} value={''} />
-            {renderPickerItems()}
-          </Picker>
-        ) : (
-          <TextInput
-            //key={props.key}
-            style={styles.input}
-            placeholder={props.placeholder}
-            value={internalValue}
-            keyboardType={keyboardType}
-            secureTextEntry={secureTextEntry}
-            onPress={handleFocus}
-            autoCapitalize={autoCapitalize}
-            onChangeText={handleInputChange}
-            onBlur={handleBlur}
-            editable={!props.disabled}
-          />
-        )}
-        {internalValue.length > 0 && !isPicker && !isDate && (
-          <TouchableOpacity style={styles.clearButton} onPress={handleClear}>
-            <Feather name="x" size={16} color="gray" />
-          </TouchableOpacity>
-        )}
-        {rightIcon != null && (
-          <View style={styles.rightIconContainer}>
-            <Feather name={rightIcon} size={16} color="gray" />
-          </View>
-        )}
-      </View>
-      {props.error && <Text style={styles.errorText}>{props.error}</Text>}
-      {showDatePicker && (
-        <DateTimePicker
-          testID="dateTimePicker"
-          value={ new Date()}
-          mode="date"
-          display="default"
-          onChange={handleInputChange}
-        />
-      )}
-    </View>
-  );
-};
 
 const styles = StyleSheet.create({
   inputBlock: {
-    width: isSmallScreen ? '90%' : width * 0.27,
-    margin: isSmallScreen ? 10 : 13,
+    width:  '90%',
+    margin: 10,
   },
+
   label: {
     fontWeight: 'bold',
-    fontSize: isSmallScreen ? 14 : 16,
-    color: 'rgb(1, 168, 134)',
+    fontSize:  14,
+    color: 'rgb(1, 121, 168)',
     marginBottom: 5,
   },
+
   inputContainer: {
-    height: isSmallScreen ? 40 : 35,
+    height: 40,
     flexDirection: 'row',
     borderWidth: 1,
-    backgroundColor: 'rgb(240, 250, 250)',
     borderColor: 'rgb(143, 143, 143)',
     borderRadius: 5,
     alignItems: 'center',
   },
+
   focusedInputContainer: {
     borderColor: 'blue',
     borderWidth: 2,
   },
+
   input: {
     flex: 1,
-    fontSize: isSmallScreen ? 14 : 16,
-    color: 'black',
-    paddingHorizontal: 10,
+    justifyContent:'center',
+    fontSize: 14,
+    backgroundColor: 'transparent',
+    height: 35,
+    borderRadius: 5,
     borderWidth: 0,
-    zIndex:10,
   },
+
+  date:{
+    color: "black", 
+    width:'100%',
+    height:'100%',
+    textAlign:'center',
+    padding:8,
+  },
+
+  inpittext: {
+    color: "black", 
+  },
+
   clearButton: {
     padding: 8,
     marginRight: 5,
   },
+
   rightIconContainer: {
     padding: 10,
   },
+
   errorText: {
     color: 'red',
     fontSize: 12,
     marginTop: 3,
   },
 });
-
-export default DynamicInput;

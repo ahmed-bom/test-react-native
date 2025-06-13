@@ -12,24 +12,28 @@ export default function DynamicSadeBar(props) {
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const slideAnim = useRef(new Animated.Value(-width)).current; 
+ 
+ 
+ 
   const renderLinks = () => {
-    if(props.links != undefined){
+
+    if(props.links == undefined) return <></>
+    
     return props.links.map((item, index) => (
       <TouchableOpacity 
         key={index}
         style={[styles.drawerItem,props.pageIndex == index && {backgroundColor:'rgba(3, 0, 45, 0.55)'}]}
         onPress={()=>{
-        props.setpageIndex(index);
-        toggleDrawer()
-      }}>
-        <Text style={
-          styles.drawerItemTextNS
-        }>
+                      props.setpageIndex(index);
+                      toggleDrawer()
+                      }
+      }>
+        <Text style={styles.drawerItemTextNS}>
           {item}
         </Text>
       </TouchableOpacity>
     ));
-    }
+    
   };
 
   const toggleDrawer = () => {
@@ -49,34 +53,36 @@ export default function DynamicSadeBar(props) {
 
   return (
     <View style={styles.container}>
+
       <View style={styles.header}>
+
         <TouchableOpacity style={styles.openbutton} onPress={toggleDrawer}>
-          <Feather style={styles.buttonText} name="menu" size={isSmallScreen ?20:30} color="white" />
+          <Feather style={styles.buttonText} name="menu" size={20} color="white" />
         </TouchableOpacity>
+        
         <Text style={styles.headerText}>{props.links[props.pageIndex]}</Text>
-        <TouchableOpacity style={styles.openbutton} onPress={()=>{props.setislogin(false)}}>
+
+        <TouchableOpacity style={styles.openbutton} onPress={props.logout}>
           <Feather style={styles.buttonText} name="log-out" size={isSmallScreen ?20:30} color="white" />
         </TouchableOpacity>
+
       </View> 
 
-
-      {props.children}
+      {
+        props.children
+      }
 
       <Animated.View
-        style={[
-          styles.drawer,
-          {
-            transform: [{ translateX: slideAnim }],
-          },
-        ]}
+        style={[styles.drawer,{transform: [{ translateX: slideAnim }]}]}
       >
 
         <TouchableOpacity style={styles.closeButton} onPress={toggleDrawer}>
           <Feather style={styles.closeButtonText} name="x" size={20} color="white" />
         </TouchableOpacity>
+        
         <Image
           style={styles.image}
-          source={require('../../assets/images/images.png')} 
+          source={require('./../assets/images/images.png')} 
         />
 
         <View
@@ -101,16 +107,17 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    paddingTop:30,
     backgroundColor: "rgb(0, 5, 60)",
     width: "100%",
-    height:60,
+    height:100,
   },
   headerText: {
-    height:"100%",
     color: "white",
     fontWeight: 'bold',
     fontSize: 14,
     paddingVertical:20,
+    width:"50%",
   },
   openbutton: {
     padding: 15,
@@ -125,7 +132,7 @@ const styles = StyleSheet.create({
 
   drawer: {
     position: 'absolute',
-    top: 0,
+    top: 30,
     left: 0,
     width:isSmallScreen ? width * 0.7:width * 0.3, 
     height: '100%',
@@ -141,7 +148,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   drawerItem: {
-    paddingLeft:isSmallScreen ?10:20,
+    paddingLeft:10,
     borderWidth: 1,
     borderLeftWidth:0,
     borderRightWidth:0,
@@ -160,8 +167,9 @@ const styles = StyleSheet.create({
   links:{
     marginTop: 0,
   },
-  image: {
-
+  image:{
+    height:150,
+    width:150,
   },
 });
 

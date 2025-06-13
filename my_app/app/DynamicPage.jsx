@@ -1,209 +1,190 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect, use } from 'react';
 import {View,Text,ScrollView,Image} from 'react-native';
-import DynamicButton from './components1/DynamicButton';
-import { StyleSheet, Dimensions } from 'react-native';
-const {width} = Dimensions.get('window');
-export const isSmallScreen = width < 500;
-
+import { StyleSheet } from 'react-native';
 
 import DynamicTable from './components2/DynamicTable';
 import DynamicForm from './components2/DynamicForm';
-
-
-function send_to_api(target, content, method) {
-  let M = {
-    method: method,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  };
-
-  if (method === 'POST') {
-    M["body"] = JSON.stringify(content);
-  }
-
-  
-  return fetch('http://127.0.0.1:8000/' + target, M)
-    .then((response) => {
-      return response.json();
-    })
-    .then((data) => {
-      return data;
-    })
-    .catch((error) => {
-      return 'server error';
-    });
-}
-
-
-
+import { Route } from 'expo-router/build/Route';
 
 
 
 export default function DynamicPage(props) {
   
-  const t = props.page.table
-
-    const [tableData, setTableData] = useState(t ? t.data : [[]]);
-    const [tableHeader, setTableHeader] = useState(t ? t.header : []);
-
-    const page = props.page;
-
-    const table = () => {
-            return (<>
-                {t && (
-                    <DynamicTable
-                        name={t.name}
-                        header={tableHeader}
-                        data={tableData}
-                    />
-                )}
-            </>);
-
+    const f = props.page.form
+    const t = props.page.table
+    const  [id_déclaration,setid_déclaration] = useState(0);
+    const [formVal, settformVal] = useState({});
+    const [tableData, settableData] = useState([]);
+    const [form_action,set_form_action] = useState("POST")//PUT
+    // esppese gegt alle eseprse lier a id déclaration
+    
+    if(t != undefined){
+      t['data']=tableData;
     }
+
+    if(f != undefined){
+      f.inputs.map((input,i)=>{
+        const fin = formVal[input.name.replace(/ /g, "_")] 
+        input.value = fin == undefined ? input.value:fin;
+      });
+      
+    }
+
+    const nex_page = () =>{
+      settableData([]);
+      props.nex_page()
+    }
+
 
     const form = () => {
-        let f = props.page.form
-        
-        return (<>
-            {f && (
-                <DynamicForm
-                form={f}
-                small={props.smallform}
-                islogin_orsignup_page={props.islogin_orsignup}
-                login_signup ={login_signup}
-                serch_table_data ={serch_table_data}
-                add_table_data = {add_table_data}
-                nex_page={props.nex_page}
-                retour={props.retour}
-                />
-            )}
-        </>);
+  
+      return (
+      <>
+        {f && (
+          <DynamicForm
+            form={f}
+            api_cole={api_cole}
+            nex_page={nex_page}
+          />
+        )}
+      </>
+    )};
+
+
+  const table = () => {
+    return (
+    <>
+      {t && (
+        <DynamicTable
+            table={t}
+            action ={tableaction}
+            
+        />
+      )}
+    </>
+    )}
+   
+  const tableaction = (act, arg) => {
+      if (act === 'modifier') {
+        //send_to_api("declarations/"+arg.ID,{},"DELETE");
+        settformVal(arg);
+        nex_page();
+      } else if (act === 'supprimer') {
+        send_to_api("declarations/"+arg.ID,{},"DELETE")
+        settableData( tableData.filter(row => row.ID !== arg.ID));
+      }
     };
 
-    function control_buttons(){
-        let b = props.page.control_buttons
-        return (<View style={{
-            alignItems:'center',
-            flex: 1,
-            flexDirection: 'row',
-            }}>
-            {b && 
-            b.map((type, i) => (
-                  <DynamicButton
-                    key={i}
-                    type={type}
-                    onPress={() => onPress_button(type)}
-                  />
-                ))
-            }
-        </View>);
-    }
+  const api_cole = (act,pth, method, data) => {
+    switch (act) {
 
-
-    const login_signup = (log_sin,values)=>{
-      const post = {
-        name : values['name'],
-        password: values['password'],
-      };
-     send_to_api(log_sin,post,'POST')
-     .then((data) => {
-        if (data == 'server error')alert(data);
-        if(data.detail)alert(data.detail);
-        else props.setislogin(true);
-      })
-    }
-
-
-    const serch_table_data = (serch_obj) =>{
-      send_to_api(t.type + "/search/",serch_obj,'POST')
-      .then((data) => {
-        if(data == 'server error') alert(data);
-        setTableData(data.map(d => Object.values(d)));
-        setTableHeader( Object.keys(data[0]));
-      })
-    }
-
-    const add_table_data = (serch_obj) =>{
-      let data = send_to_api(t.type,serch_obj,'POST')
-      .then((data) => {
-        if(data == 'server error') alert(data);
-        setTableData([...tableData,Object.values(data)]);
-      })
-    } 
-
-    const onPress_button = (type) => {
-        switch (type) {    
-          case "Next":
-            return () => {
-              props.nex_page()
-            };
-          case "Retour":
-            return () => {
-              props.retour()
-            };
-          case "Enregistrer":
-            return () => {
-              if (validateForm()) {
-                console.log(inputs_list);
+      case "s'inscrire":
+        send_to_api("signup",data,method)
+        .then ( (data) => 
+              {
+                if (data == 'server error')alert(data);
+                else if(data.detail)alert(data.detail);
+                else props.login()
               }
-            };
-          default:
-            return () => {}
-        };
-      };
-      
-
-
-
-      const creat_declaration = ()=>{
-        const post = {
-          NUMEROVISA: "string",
-          DATEDECLARATION: "2025-05-18",
-          ID_REFNAVIRE: 0,
-          ID_REFENTITEDEBARQ: 0,
-          ID_REFENTITEDECLAR: 0,
-          ID_REFTYPEDECLAR: 0,
-          DATEDEBUTMAREE: "2025-05-18",
-          DATEFINMAREE: "2025-05-18",
-          DATEDEBARQ: "2025-05-18",
-          DATEVISA: "2025-05-18",
-          DECLAREPAR: "string",
-          ID_REFREGISTRE: 0,
-          ETAT: "string"
+              )
+        break
+      case 'se connecter':
+        send_to_api("login",data,method)
+        .then ( (data) => 
+              {
+                if (data == 'server error')alert(data);
+                else if(data.detail)alert(data.detail);
+                else props.login()
+              }
+              )
+        break
+      case 'Rechercher':
+        send_to_api(pth,data,method)
+        .then ( (data) => 
+              {
+                if (data == 'server error')alert(data);
+                else if(data.detail)alert(data.detail);
+                else settableData(data)
+              }
+              )
+        break
+      case 'Ajouter Éspeces':
+          data['id_déclaration'] = id_déclaration
+          data['ETAT'] = 0
+          send_to_api(pth,data,'POST')
+          .then ( (data) => 
+                {
+                  if (data == 'server error')alert(data);
+                  else if(data.detail)alert(data.detail);
+                  else {settableData([...tableData,data])}
+                }
+                )
+          break
+      case 'Ajouter Déclaration':
+        data['ETAT'] = 0
+        if(form_action == "POST"){
+        send_to_api(pth,data,"POST")
+        .then ( (data) => 
+              {
+                if (data == 'server error')alert(data);
+                else if(data.detail)alert(data.detail);
+                else {
+                  setid_déclaration(data.ID);
+                  settableData([])}
+              }
+              )
         }
+        else if(form_action == "PUT"){
+          send_to_api("declarations/"+id_déclaration,data,"PUT")
+          .then ( (data) => 
+            {
+              if (data == 'server error')alert(data);
+              else if(data.detail)alert(data.detail);
+            }
+          )
+        }
+        break
 
-        
-        fetch('http://127.0.0.1:8000/declarations', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(post),
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            console.log(data)  
-          })
-          .catch((error) => {
-              alert('server error');
-          });
-      }
+    
+      default:
+        console.log("'o'");
+        break;
+
+    }
+  }
+
+
+
+    const login_signup = (log_sin,data)=>{
+
+     send_to_api(log_sin,data,'POST')
+     .then( (data) => 
+        {
+          if (data == 'server error')alert(data);
+          else if(data.detail)alert(data.detail);
+          else props.login();
+        }
+      )
+
+    }
+
 
 
 
 
   return (
     <View style={styles.container}> 
-        <ScrollView>
+        <ScrollView style={styles.ScrollView}>
             <View style={styles.container}>
-            <Image
-                style={styles.image}
-                source={require('./../assets/images/images3.png')} 
-            /> 
-                {form()}
-                {table()}
-                {control_buttons()}
+
+              <Image
+                  style={styles.image}
+                  source={require('./../assets/images/images3.png')} 
+              /> 
+
+              {form()}
+              {table()}
+
             </View>
 
         </ScrollView>
@@ -215,14 +196,59 @@ export default function DynamicPage(props) {
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
-        padding: isSmallScreen ? 10 : 20,
+        paddingHorizontal:10,
+        paddingBottom:100,
         minHeight: '100vh',
+        display:'flex',
         alignItems:'center',
-        justifyContent:'center',
-
     },
-    image:{
-        
+    ScrollView: {        
+      paddingTop:30,
     }
 });
+
+
+const send_to_api = (target, content, method)=> {
+
+  const API_URL = 'http://192.168.151.142:8000';
+  let url = API_URL + '/' + target;
+
+
+
+  let M = {
+    method: method,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  };
+
+
+  if(method === 'GET'|| method === "DELETE"){
+    const cleanContent = {};
+    if (content && typeof content === 'object') {
+      Object.keys(content).forEach(key => {
+        const value = content[key];
+        if (value !== '' && value !== null && value !== undefined) {
+          cleanContent[key] = value;
+        }
+      });
+    }
+
+    const queryParams = new URLSearchParams(cleanContent).toString();
+    url += '?' + queryParams;
+    
+  }else{
+    M["body"] = JSON.stringify(content);
+  }
+  
+  return fetch(url, M)
+    .then((response) => {
+      return response.json();
+    })
+    .then((data) => {
+      return data;
+    })
+    .catch((error) => {
+      return 'server error';
+    });
+}

@@ -12,7 +12,7 @@ export default function DynamicLink(props) {
             {props.text}
         </Text>
         <TouchableOpacity 
-            onPress={props.onPress()}
+            onPress={props.onPress}
             key={props.key}
         >
             <Text style={styles.link}>{props.link}</Text>
@@ -37,12 +37,12 @@ export default function DynamicLink(props) {
 
 const styles = StyleSheet.create({
     link:{
-        marginHorizontal: 7,
+        marginHorizontal: 3,
         color: 'rgb(74, 158, 255)',
         fontWeight: 'bold',
     },
     container: {
-        margin:10,
+        marginVertical:10,
         flexDirection: 'row',
         flexWrap: 'wrap',
     },

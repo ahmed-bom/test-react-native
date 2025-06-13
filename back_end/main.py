@@ -1,26 +1,12 @@
-from typing import List, Optional
 from datetime import date
-from fastapi import FastAPI, HTTPException, Query,Depends
+from typing import Optional, List
+
+from fastapi import FastAPI, HTTPException, Depends, Query
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
-from db import (
-                    get_db,
-                    Session,
-                    UserModel,
-                    Declaration_peche_model,
-                    PE_PRD_SOURCEESPDC_model
-                )
-
-from pydantic_my_models import (
-                                    UserCreate,
-                                    Declaration_Peche_Create,
-                                    DeclarationPeche,
-                                    PE_PRD_SOURCEESPC_Create,
-                                    PE_PRD_SOURCEESPDC_Read
-                                )
-
-
+from db import *
+from models import *
 
 app = FastAPI()
 
@@ -33,12 +19,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+
 def get_hashed_password(pas):
     # TODO
     return pas
 
 
-@app.post("/register")
+@app.post("/signup")
 def register_user(user: UserCreate, db: Session = Depends(get_db)):
     existing_user = db.query(UserModel).filter_by(name=user.name).first()
     
@@ -77,156 +72,128 @@ def login(user: UserCreate, db: Session = Depends(get_db)):
     return {"login" : 200}
 
 
-@app.post("/declarations/", response_model=DeclarationPeche)
-def create_declaration(declaration: Declaration_Peche_Create, db: Session = Depends(get_db)):
-    db_declaration = Declaration_peche_model(**declaration.dict(exclude_unset=True))
+
+
+
+@app.post("/declarations/", response_model=DéclarationDeCaptureResponse, summary="إضافة إعلان جديد")
+def create_declaration(declaration: DéclarationDeCaptureCreate, db: Session = Depends(get_db)):
+    db_declaration = Déclaration_de_capture(**declaration.dict())
     db.add(db_declaration)
     db.commit()
     db.refresh(db_declaration)
     return db_declaration
 
 
-@app.get("/declarations/{declaration_id}", response_model=DeclarationPeche)
-def read_declaration(declaration_id: int, db: Session = Depends(get_db)):
-    db_declaration = db.query(Declaration_peche_model).filter(Declaration_peche_model.ID == declaration_id).first()
-    if db_declaration is None:
+
+
+@app.put("/declarations/{declaration_id}", response_model=DéclarationDeCaptureResponse, summary="تعديل إعلان موجود")
+def update_declaration(declaration_id: int, declaration: DéclarationDeCaptureUpdate, db: Session = Depends(get_db)):
+    db_declaration = db.query(Déclaration_de_capture).filter(Déclaration_de_capture.ID == declaration_id).first()
+    if not db_declaration:
         raise HTTPException(status_code=404, detail="Declaration not found")
+    
+    for key, value in declaration.dict(exclude_unset=True).items():
+        setattr(db_declaration, key, value)
+    
+    db.commit()
+    db.refresh(db_declaration)
     return db_declaration
 
-@app.get("/declarations/", response_model=List[DeclarationPeche])
-def read_declarations(db: Session = Depends(get_db)):
-    declarations = db.query(Declaration_peche_model).all()
-    return declarations
-
-@app.post("/declarations/search/", response_model=List[DeclarationPeche])
-def search_declarations(declaration:Declaration_Peche_Create,db: Session = Depends(get_db)):
-    
-    
-    query = db.query(Declaration_peche_model)
-    if declaration.NUMEROVISA is not "":
-        query = query.filter(Declaration_peche_model.NUMEROVISA.like(f"%{declaration.NUMEROVISA}%"))
-    
-    if declaration.DATEDECLARATION is not "":
-        query = query.filter(Declaration_peche_model.DATEDECLARATION == declaration.DATEDECLARATION)
-    
-    if declaration.ID_REFNAVIRE is not "":
-        query = query.filter(Declaration_peche_model.ID_REFNAVIRE == declaration.ID_REFNAVIRE)
-    
-    if declaration.ID_REFENTITEDEBARQ is not "":
-        query = query.filter(Declaration_peche_model.ID_REFENTITEDEBARQ == declaration.ID_REFENTITEDEBARQ)
-    
-    if declaration.ID_REFENTITEDECLAR is not "":
-        query = query.filter(Declaration_peche_model.ID_REFENTITEDECLAR == declaration.ID_REFENTITEDECLAR)
-    
-    if declaration.ID_REFTYPEDECLAR is not "":
-        query = query.filter(Declaration_peche_model.ID_REFTYPEDECLAR == declaration.ID_REFTYPEDECLAR)
-    
-    if declaration.DATEDEBUTMAREE is not "":
-        query = query.filter(Declaration_peche_model.DATEDEBUTMAREE == declaration.DATEDEBUTMAREE)
-    
-    if declaration.DATEFINMAREE is not "":
-        query = query.filter(Declaration_peche_model.DATEFINMAREE == declaration.DATEFINMAREE)
-    
-    if declaration.DATEDEBARQ is not "":
-        query = query.filter(Declaration_peche_model.DATEDEBARQ == declaration.DATEDEBARQ)
-    
-    if declaration.DATEVISA is not "":
-        query = query.filter(Declaration_peche_model.DATEVISA == declaration.DATEVISA)
-    
-    if declaration.DECLAREPAR is not "":
-        query = query.filter(Declaration_peche_model.DECLAREPAR.like(f"%{declaration.DECLAREPAR}%"))
-    
-    if declaration.ID_REFREGISTRE is not "":
-        query = query.filter(Declaration_peche_model.ID_REFREGISTRE == declaration.ID_REFREGISTRE)
-    
-    if declaration.ETAT is not "":
-        query = query.filter(Declaration_peche_model.ETAT == declaration.ETAT)
-    
-    return query.all()
 
 
 
-# ===========================================================
 
-
-
-@app.post("/produits/", response_model=PE_PRD_SOURCEESPDC_Read)
-def create_produit(produit: PE_PRD_SOURCEESPC_Create, db: Session = Depends(get_db)):
-    db_produit = PE_PRD_SOURCEESPDC_model(**produit.dict(exclude_unset=True))
-    db.add(db_produit)
+@app.delete("/declarations/{declaration_id}", summary="حذف إعلان")
+def delete_declaration(declaration_id: int, db: Session = Depends(get_db)):
+    db_declaration = db.query(Déclaration_de_capture).filter(Déclaration_de_capture.ID == declaration_id).first()
+    if not db_declaration:
+        raise HTTPException(status_code=404, detail="Declaration not found")
+    db.delete(db_declaration)
     db.commit()
-    db.refresh(db_produit)
-    return db_produit
+    return {"message": "Declaration deleted successfully"}
 
-@app.get("/produits/{produit_id}", response_model=PE_PRD_SOURCEESPDC_Read)
-def read_produit(produit_id: int, db: Session = Depends(get_db)):
-    db_produit = db.query(PE_PRD_SOURCEESPDC_model).filter(PE_PRD_SOURCEESPDC_model.ID == produit_id).first()
-    if db_produit is None:
-        raise HTTPException(status_code=404, detail="Produit not found")
-    return db_produit
 
-@app.get("/produits/", response_model=List[PE_PRD_SOURCEESPDC_Read])
-def read_produits( db: Session = Depends(get_db)):
-    produits = db.query(PE_PRD_SOURCEESPDC_model).all()
-    return produits
 
-@app.get("/produits/search/", response_model=List[PE_PRD_SOURCEESPDC_Read])
-def search_produits(
-    id_refdeclaration: Optional[int] = Query(None),
-    id_refespece: Optional[int] = Query(None),
-    quantite: Optional[float] = Query(None),
-    id_refuniteqte: Optional[int] = Query(None),
-    nbcaisses: Optional[int] = Query(None),
-    poidsvifestime: Optional[float] = Query(None),
-    poidsadebarqueestime: Optional[float] = Query(None),
-    poidsadebarqueverifie: Optional[float] = Query(None),
-    id_refzonepeche: Optional[int] = Query(None),
-    longitude: Optional[float] = Query(None),
-    latitude: Optional[float] = Query(None),
-    id_navire: Optional[int] = Query(None),
-    id_typetransformation: Optional[int] = Query(None),
-    poidsvendu: Optional[float] = Query(None),
+
+
+@app.get("/declarations/search/", response_model=List[DéclarationDeCaptureResponse], summary="البحث عن إعلانات")
+def search_declarations(
+    Numero_Visa: Optional[int] = Query(None, description="رقم التأشيرة"),
+    Numero_Immatriculation: Optional[int] = Query(None, description="رقم التسجيل"),
+    Port_Declaration: Optional[str] = Query(None, description="ميناء الإعلان"),
+    Periode_DU: Optional[date] = Query(None, description="تاريخ بداية الفترة (للبحث عن تاريخ الإعلان)"),
+    Periode_AU: Optional[date] = Query(None, description="تاريخ نهاية الفترة (للبحث عن تاريخ الإعلان)"),
     db: Session = Depends(get_db)
 ):
-    query = db.query(PE_PRD_SOURCEESPDC_model)
-    if id_refdeclaration is not None:
-        query = query.filter(PE_PRD_SOURCEESPDC_model.ID_REFDECLARATION == id_refdeclaration)
-    if id_refespece is not None:
-        query = query.filter(PE_PRD_SOURCEESPDC_model.ID_REFESPECE == id_refespece)
-    if quantite is not None:
-        query = query.filter(PE_PRD_SOURCEESPDC_model.QUANTITE == quantite)
-    if id_refuniteqte is not None:
-        query = query.filter(PE_PRD_SOURCEESPDC_model.ID_REFUNITEQTE == id_refuniteqte)
-    if nbcaisses is not None:
-        query = query.filter(PE_PRD_SOURCEESPDC_model.NBCAISSES == nbcaisses)
-    if poidsvifestime is not None:
-        query = query.filter(PE_PRD_SOURCEESPDC_model.POIDSVIFESTIME == poidsvifestime)
-    if poidsadebarqueestime is not None:
-        query = query.filter(PE_PRD_SOURCEESPDC_model.POIDSADEBARQUEESTIME == poidsadebarqueestime)
-    if poidsadebarqueverifie is not None:
-        query = query.filter(PE_PRD_SOURCEESPDC_model.POIDSADEBARQUEVERIFIE == poidsadebarqueverifie)
-    if id_refzonepeche is not None:
-        query = query.filter(PE_PRD_SOURCEESPDC_model.ID_REFZONEPECHE == id_refzonepeche)
-    if longitude is not None:
-        query = query.filter(PE_PRD_SOURCEESPDC_model.LONGITUDE == longitude)
-    if latitude is not None:
-        query = query.filter(PE_PRD_SOURCEESPDC_model.LATITUDE == latitude)
-    if id_navire is not None:
-        query = query.filter(PE_PRD_SOURCEESPDC_model.ID_NAVIRE == id_navire)
-    if id_typetransformation is not None:
-        query = query.filter(PE_PRD_SOURCEESPDC_model.ID_TYPETRANSFORMATION == id_typetransformation)
-    if poidsvendu is not None:
-        query = query.filter(PE_PRD_SOURCEESPDC_model.POIDSVENDU == poidsvendu)
-    return query.all()
+   
+    query = db.query(Déclaration_de_capture)
+
+    if  Numero_Visa is not None:
+        query = query.filter(Déclaration_de_capture.Numero_Visa ==  Numero_Visa)
+    if Numero_Immatriculation is not None:
+        query = query.filter(Déclaration_de_capture.Numéro_Immatriculation == Numero_Immatriculation)
+    if Port_Declaration:
+        query = query.filter(Déclaration_de_capture.Port_Decalaration.ilike(f"%{Port_Declaration}%")) # ilike for case-insensitive search
+
+    if Periode_DU and Periode_AU:
+        query = query.filter(Déclaration_de_capture.Date_Déclaration >= Periode_DU,
+                             Déclaration_de_capture.Date_Déclaration <= Periode_AU)
+    elif Periode_DU:
+        query = query.filter(Déclaration_de_capture.Date_Déclaration >= Periode_DU)
+    elif Periode_AU:
+        query = query.filter(Déclaration_de_capture.Date_Déclaration <= Periode_AU)
+
+    declarations = query.all()
+    return declarations
 
 
 
 
-@app.get('/test/{text}')
-async def test(text:str):
-    return {"test" : text}
 
 
+
+
+
+@app.post("/especes/", response_model=ÉspecesResponse, summary="إضافة نوع سمك جديد")
+def create_espece(espece: ÉspecesCreate, db: Session = Depends(get_db)):
+    db_espece = Éspeces(**espece.dict())
+    db.add(db_espece)
+    db.commit()
+    db.refresh(db_espece)
+    return db_espece
+
+
+
+
+@app.put("/especes/{espece_id}", response_model=ÉspecesResponse, summary="تعديل نوع سمك موجود")
+def update_espece(espece_id: int, espece: ÉspecesUpdate, db: Session = Depends(get_db)):
+    db_espece = db.query(Éspeces).filter(Éspeces.ID == espece_id).first()
+    if not db_espece:
+        raise HTTPException(status_code=404, detail="Espece not found")
+    
+    for key, value in espece.dict(exclude_unset=True).items():
+        setattr(db_espece, key, value)
+    
+    db.commit()
+    db.refresh(db_espece)
+    return db_espece
+
+
+
+
+@app.delete("/especes/{espece_id}", summary="حذف نوع سمك")
+def delete_espece(espece_id: int, db: Session = Depends(get_db)):
+    db_espece = db.query(Éspeces).filter(Éspeces.ID == espece_id).first()
+    if not db_espece:
+        raise HTTPException(status_code=404, detail="Espece not found")
+    db.delete(db_espece)
+    db.commit()
+    return {"message": "Espece deleted successfully"}
+
+
+
+ip_host = "127.0.0.1"
+ip_host = "192.168.151.142"
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host= "127.0.0.1",port= 8000,reload= True)
+    uvicorn.run("main:app", host= ip_host ,port= 8000,reload= True)

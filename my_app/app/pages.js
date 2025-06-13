@@ -1,9 +1,9 @@
 import { Link } from "expo-router";
 
 const login = {
-    name : "login",
+    name : "se connecter",
     form : {
-        name : "login",
+        name : "se connecter",
         inputs: [   
             {
                 name : "name",
@@ -14,11 +14,11 @@ const login = {
                 type : "password",
             },                  
         ],
-        buttons:["login"],
+        buttons:["se connecter"],
         Links:[
             {
-                text:"tu na pas un cont",
-                link:"signup",
+                text:"vous n'avez pas de compte",
+                link:"s'inscrire",
             }
         ]
     },
@@ -27,9 +27,9 @@ const login = {
 
  const signup = {
 
-    name: "signup",
+    name: "s'inscrire",
     form: {
-        name : "signup",
+        name : "s'inscrire",
         inputs: [  
             {
                 name : "name",
@@ -47,11 +47,11 @@ const login = {
             },  
                 
         ],
-        buttons:["signup"],
+        buttons:["s'inscrire"],
         Links:[
             {
-                text:"tu a dega un cont",
-                link:"login"
+                text:"vous avez déjà un compte",
+                link:"se connecter"
             }
         ]
     }
@@ -60,7 +60,7 @@ const login = {
 
 const Déclaration_capture_recherche = {
 
-    name : "Recherche Déclaration de capture",
+    name : "Recherche Déclaration",
     form : {
         name : "recherche",
         inputs: [   
@@ -71,7 +71,7 @@ const Déclaration_capture_recherche = {
                 
             },   
             {
-                name : "Numéro Immatriculation",
+                name : "Numero Immatriculation",
                 type : "numeric",
                 value : "",
 
@@ -100,19 +100,15 @@ const Déclaration_capture_recherche = {
         ],
         buttons:[
             "Réinitialiser",
-            "Rechercher",
+            "Rechercher", 
+            "Ajouter Déclaration",
         ]
     },
     
     table : {
             name : "Résulta",
             type: "declarations",
-            header : [],
-            data : []
     },
-    control_buttons:[
-        "Next",
-    ] 
 };
 
 
@@ -124,17 +120,22 @@ const add_éspeces ={
             inputs: [   
                 {
                     name : "espece",
-                    type : "default",
+                    type : "picker",
                     value : "",
+                    items : [
+                        "espece 1",
+                        "espece 2",
+                        "espece 3",
+                    ],
                 },  
                 {
                     name : "zonePeche",
                     type : "picker",
                     value : "",
                     items : [
-                                "zonePeche 5",
-                                "zonePeche 6",
-                                "zonePeche 7",
+                                "zone 5",
+                                "zone 6",
+                                "zone 7",
                             ],
 
                 },   
@@ -165,21 +166,15 @@ const add_éspeces ={
                                    
             ],
             buttons:[
-                "Sebmet",
+                "Ajouter",
                 "Réinitialiser",
+                "Enregistrer"
             ]
         },
     table :{
             name : "Lignes",
             type: "declarations",
-            header : [],
-            data : []
-    },
-    control_buttons:[
-        "Retour",
-        "Next",
-    ]
-    
+    },   
 };
 
 const new_Déclaration_capture = {
@@ -187,6 +182,12 @@ const new_Déclaration_capture = {
     form:{
         name :"formulair d'ajout",
         inputs: [
+            {
+                name : "Numéro Immatriculation",
+                type : "numeric",
+                value : "",
+    
+            },  
             {
                 name : "Date Début Marée",
                 type : "date",
@@ -269,21 +270,10 @@ const new_Déclaration_capture = {
             },      
         ],
         buttons:[
-            "Ajouter",
+            "Ajouter Éspeces",
             "Réinitialiser",
         ]
     },
-    table :
-    {
-        name : "Recherche navire",
-        type: "declarations",
-        header : [],
-        data : []
-    },
-    control_buttons:[
-        "Retour",
-        "Next",
-    ]
 }
 
 
